@@ -36,63 +36,44 @@
 		// Preveine os eventos padrões do botão quando este for clicado
 		if(!e.defaultPrevented) e.preventDefault();
 
-		// Obtém todos os campos do tipo select que não estão desabilitados em tela.
-		var selectFields = {};
+		var formData = new FormData();
 		$(this).find('select:not(:disabled)').each(function() {
-			selectFields[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
-
-		// Obtém todos os campos de tipo input que não são radio ou checkbox
 		var inputText = {};
 		$(this).find('input[type="text"]:not(:disabled),input[type="password"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
 		$(this).find('input[type="color"]:not(:disabled),input[type="date"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
 		$(this).find('input[type="datetime-local"]:not(:disabled),input[type="email"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
 		$(this).find('input[type="hidden"]:not(:disabled),input[type="month"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
 		$(this).find('input[type="number"]:not(:disabled),input[type="range"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
 		$(this).find('input[type="search"]:not(:disabled),input[type="tel"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
 		$(this).find('input[type="time"]:not(:disabled),input[type="url"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
 		$(this).find('input[type="week"]:not(:disabled)').each(function() {
-			inputText[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
-
-		// Obtém os campos do tipo input[radio]
-		var inputRadio = [];
 		$(this).find('input[type="radio"]:not(:disabled):checked').each(function() {
-			inputRadio[$(this).prop('name')] = $(this).val();
+			formData.append($(this).prop('name'), $(this).val());
 		});
-
-		// Obtém os campos do tipo input[checkbox]
-		var inputCheckbox = [];
 		$(this).find('input[type="checkbox"]:not(:disabled):checked').each(function() {
-			
-			var name = $(this).prop('name');
-			
-			if(!(name in inputCheckbox))
-				inputCheckbox[name] = [];
-			
-			inputCheckbox[name].push($(this).val());
+			formData.append($(this).prop('name'), $(this).val());
+		});		
+		$(this).find('input[type="file"]:not(:disabled)').each(function() {
+			formData.append($(this).prop('name'), this.files[0]);
 		});
-
-		// Campos de dados a serem enviados ao banco
-		var dataFields = {};
-		$.extend(dataFields, selectFields);
-		$.extend(dataFields, inputText);
-		$.extend(dataFields, inputRadio);
-		$.extend(dataFields, inputCheckbox);
 
 		// Constroi os dados para envio do formulário via ajax.
 		var configAjax = $(this).data();
@@ -103,12 +84,19 @@
 			type : $(this).prop('method'),
 			method : $(this).prop('method'),
 			context : this,
-			data : dataFields
+			data : formData,
+			contentType : false,
+			processData : false
 		});
 		
 		// Envia a requisição de dados para tratamento das informações.
 		$.ajaxRequest(configAjax)
 			.done(function(data, textStatus, jqXHR) {
+				// Reseta os dados da tela
+				$(this).each(function(){
+					this.reset();
+				});
+				// Dispara os dados de sucesso
 				$(this).trigger('success', data);
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
