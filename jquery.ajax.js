@@ -37,39 +37,51 @@
 		if(!e.defaultPrevented) e.preventDefault();
 
 		var formData = new FormData();
+		var _beforeSendData = {};
 		$(this).find('select:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		var inputText = {};
 		$(this).find('input[type="text"]:not(:disabled),input[type="password"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="color"]:not(:disabled),input[type="date"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="datetime-local"]:not(:disabled),input[type="email"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="hidden"]:not(:disabled),input[type="month"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="number"]:not(:disabled),input[type="range"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="search"]:not(:disabled),input[type="tel"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="time"]:not(:disabled),input[type="url"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="week"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="radio"]:not(:disabled):checked').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});
 		$(this).find('input[type="checkbox"]:not(:disabled):checked').each(function() {
 			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
 		});		
 		$(this).find('input[type="file"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), this.files[0]);
@@ -77,6 +89,9 @@
 
 		// Constroi os dados para envio do formulário via ajax.
 		var configAjax = $(this).data();
+
+		// Grava os dados de form antes do envio.
+		$(this).prop('adata', JSON.stringify(_beforeSendData));
 		
 		// Adiciona as configurações de ajax para envio do form.
 		$.extend(configAjax, {
@@ -100,9 +115,18 @@
 				$(this).trigger('success', data);
 			})
 			.fail(function(jqXHR, textStatus, errorThrown) {
-				$(this).trigger('success', {
+				$(this).trigger('error', {
 					'textStatus' : textStatus,
 					'errorThrown' : errorThrown
+				});
+				
+				var _this = this;
+				var adata = JSON.parse($(this).prop('adata'));
+
+				$.each(adata, function(name, val) {
+					$(_this).find('[name='+ name +']').each(function() {
+						$(this).val(val);
+					});
 				});
 			});
 
