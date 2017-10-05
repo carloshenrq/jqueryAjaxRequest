@@ -86,6 +86,10 @@
 		$(this).find('input[type="file"]:not(:disabled)').each(function() {
 			formData.append($(this).prop('name'), this.files[0]);
 		});
+		$(this).find('textarea:not(:disabled)').each(function() {
+			formData.append($(this).prop('name'), $(this).val());
+			_beforeSendData[$(this).prop('name')] = $(this).val();
+		});
 
 		// Constroi os dados para envio do formulário via ajax.
 		var configAjax = $(this).data();
